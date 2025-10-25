@@ -1,28 +1,17 @@
-// You can write more code here
-
-/* START OF COMPILED CODE */
-
-/* START-USER-IMPORTS */
-/* END-USER-IMPORTS */
 
 export default class Preloader extends Phaser.Scene {
 
 	constructor() {
 		super("Preloader");
 
-		/* START-USER-CTR-CODE */
-		// Write your code here.
-		/* END-USER-CTR-CODE */
+	
 	}
 
 	/** @returns {void} */
 	editorCreate() {
 
-		// background
-		this.add.image(512, 384, "background");
-
 		// progressBar
-		const progressBar = this.add.rectangle(525, 268, 468, 32);
+		const progressBar = this.add.rectangle(522, 356, 468, 32);
 		progressBar.isFilled = true;
 		progressBar.fillColor = 14737632;
 		progressBar.isStroked = true;
@@ -60,6 +49,12 @@ export default class Preloader extends Phaser.Scene {
     {
         // Use the 'pack' file to load in any assets you need for this scene
         this.load.pack('preload', 'assets/preload-asset-pack.json');
+        
+        // === Carga de banderas ===
+            this.load.image("flag_es", "assets/image/flags/ar.png");
+            this.load.image("flag_en", "assets/image/flags/us.png");
+            this.load.image("flag_pt", "assets/image/flags/br.png");
+
     }
 
     create ()

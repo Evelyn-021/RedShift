@@ -1,7 +1,9 @@
-/* START OF COMPILED CODE */
-
-/* START-USER-IMPORTS */
-/* END-USER-IMPORTS */
+import Phaser from "phaser";
+import { DE, EN, ES, PT } from "../../enums/languages";
+import { FETCHED, FETCHING, READY, TODO } from "../../enums/status";
+import { getTranslations, getPhrase } from "../../services/translations";
+import keys from "../../enums/keys";
+import GlitchPostFx from "../../lib/GlitchPostFx.js";
 
 export default class MainMenu extends Phaser.Scene {
 
@@ -16,35 +18,80 @@ export default class MainMenu extends Phaser.Scene {
 	/** @returns {void} */
 	editorCreate() {
 
-		// background
-		this.add.image(512, 384, "background");
-
 		// logo
-		this.add.image(497, 324, "logo");
-
-		// text
-		const text = this.add.text(531, 589, "", {});
-		text.setOrigin(0.5, 0.5);
-		text.text = "Main Menu";
-		text.setStyle({ "align": "center", "color": "#ffffff", "fontFamily": "Arial Black", "fontSize": "38px", "stroke": "#000000", "strokeThickness": 8 });
+		this.add.image(475, 334, "logo");
 
 		this.events.emit("scene-awake");
 	}
 
 	/* START-USER-CODE */
 
-	// Write your code here
-    create ()
-    {
+	create() {
 		this.editorCreate();
 
-        this.input.once('pointerdown', () => {
+		// === Selector de idioma con banderas ===
+		const flags = [
+			{ key: "flag_es", lang: "es" },
+			{ key: "flag_en", lang: "en" },
+			{ key: "flag_pt", lang: "pt" }
+		];
 
-            this.scene.start('Game');
+		let x = 200;
+		const icons = [];
 
-        });
-    }
-        /* END-USER-CODE */
+		flags.forEach((flag) => {
+			const icon = this.add.image(x, 80, flag.key)
+				.setScale(0.4)
+				.setInteractive({ useHandCursor: true })
+				.on("pointerdown", () => {
+					getTranslations(flag.lang, () => this.scene.restart());
+				});
+
+			icon.on("pointerover", () => {
+				icon.setScale(0.45);
+				icon.setTint(0xffd54f);
+			});
+
+			icon.on("pointerout", () => {
+				icon.setScale(0.4);
+				icon.clearTint();
+			});
+
+			x += 100;
+			icons.push(icon);
+		});
+
+		// Botón 'Jugar'
+		const playButton = this.add.text(475, 550, getPhrase('Jugar'), {
+			fontFamily: 'Arial Black',
+			fontSize: 48,
+			color: '#ffffff',
+			backgroundColor: '#ff9800',
+			align: 'center',
+			padding: { left: 20, right: 20, top: 0, bottom: 10 },
+			stroke: '#000000',
+			strokeThickness: 6
+		})
+			.setOrigin(0.5)
+			.setInteractive({ useHandCursor: true });
+
+		playButton.on('pointerover', () => playButton.setStyle({ backgroundColor: '#e65100' }));
+		playButton.on('pointerout', () => playButton.setStyle({ backgroundColor: '#ff9800' }));
+		playButton.on('pointerdown', () => this.scene.start('Game'));
+
+		// === Aplicar glitch shader a toda la cámara ===
+		if (this.renderer instanceof Phaser.Renderer.WebGL.WebGLRenderer) {
+			// Registrar el pipeline correctamente (PostFX)
+			if (!this.renderer.pipelines.has('GlitchPostFx')) {
+				this.renderer.pipelines.addPostPipeline('GlitchPostFx', GlitchPostFx);
+			}
+
+			// Aplicarlo a la cámara principal
+			this.cameras.main.setPostPipeline('GlitchPostFx');
+		}
+	}
+
+	/* END-USER-CODE */
 }
 
 /* END OF COMPILED CODE */

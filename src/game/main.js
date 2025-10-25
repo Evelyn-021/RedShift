@@ -3,7 +3,6 @@ import Game from './scenes/Game';
 import GameOver from './scenes/GameOver';
 import MainMenu from './scenes/MainMenu';
 import Preloader from './scenes/Preloader';
-
 // Find out more information about the Game Config at:
 // https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
 const config = {
@@ -22,7 +21,9 @@ const config = {
         MainMenu,
         Game,
         GameOver
-    ]
+    ],
+
+  
 };
 
 export default new Phaser.Game(config);
