@@ -25,13 +25,14 @@ import {
 
 // 🔹 Tu configuración de Firebase (RedShift)
 const firebaseConfig = {
-  apiKey: "AIzaSyAptrDpqBsDT4cthEaTSmnKfVVK3_xJFIs",
-  authDomain: "redshift-dcd0c.firebaseapp.com",
-  projectId: "redshift-dcd0c",
-  storageBucket: "redshift-dcd0c.firebasestorage.app",
-  messagingSenderId: "385820789481",
-  appId: "1:385820789481:web:99db186b9595f55a307e78"
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID
 };
+
 
 
 
