@@ -85,13 +85,13 @@ export default class Registro extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // 🟣 Mensaje dinámico
-    const message = this.add.text(cx, cy + 90, "", {
+    const message = this.add.text(cx, cy + 80, "", {
       fontFamily: "Arial",
       fontSize: 16,
       color: "#ff0000",
     }).setOrigin(0.5);
 
-    // 🧠 Login con lógica del profesor
+   
     boton.on("pointerdown", async () => {
       const email = emailInput.node.value.trim();
       const password = passInput.node.value.trim();
@@ -129,10 +129,10 @@ export default class Registro extends Phaser.Scene {
     });
 
     // 🔹 Separador
-    this.add.text(cx, cy + 130, "o continuar con", {
+    this.add.text(cx, cy + 108, "o continuar con", {
       fontFamily: "Arial",
-      fontSize: 15,
-      color: "#999",
+      fontSize: 18,
+      color: "#000000ff",
     }).setOrigin(0.5);
 
     // 🧿 Íconos (GitHub, Anónimo, Google)
@@ -177,7 +177,7 @@ export default class Registro extends Phaser.Scene {
     });
 
     // 🩶 Firma
-    this.add.text(cx, this.scale.height - 40, "© Red Studio 2025", {
+    this.add.text(cx, this.scale.height - 80, "© Red Studio 2025", {
       fontFamily: "Arial",
       fontSize: 20,
       color: "#ff0000ff",
