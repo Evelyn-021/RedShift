@@ -4,25 +4,49 @@ const PROJECT_ID = "4a2b4bcb-cd75-49b8-9895-9e46b5b556ff";
 let translations = null;
 let language = ES;
 
+// 🔹 Detectamos el modo actual
+const mode = import.meta.env.VITE_MODE;
+
+/**
+ * Obtiene las traducciones desde la API Traducila
+ * Si estamos en modo arcade, no hace ningún fetch externo.
+ */
 export async function getTranslations(lang, callback) {
-  localStorage.setItem("translations", null);
-  translations = null;
   language = lang;
-  if (language === ES) {
-    return callback ? callback() : false;
+  translations = null;
+  localStorage.setItem("translations", null);
+
+  // 🟣 Si es modo arcade → no llamar a la API
+  if (mode === "arcade") {
+    console.log("🎮 Modo arcade: traducciones deshabilitadas.");
+    if (callback) callback();
+    return;
   }
 
-  return await fetch(
-  `https://traducila.vercel.app/api/translations/${PROJECT_ID}/${language}`
-  )
-    .then((response) => response.json())
-    .then((data) => {
-      localStorage.setItem("translations", JSON.stringify(data));
-      translations = data;
-      if (callback) callback();
-    });
+  // Si el idioma es español, no traducimos
+  if (language === ES) {
+    if (callback) callback();
+    return;
+  }
+
+  try {
+    console.log("🌐 Cargando traducciones desde Traducila...");
+    const response = await fetch(
+      `https://traducila.vercel.app/api/translations/${PROJECT_ID}/${language}`
+    );
+    const data = await response.json();
+    localStorage.setItem("translations", JSON.stringify(data));
+    translations = data;
+    if (callback) callback();
+  } catch (err) {
+    console.warn("⚠️ Error cargando traducciones:", err);
+    if (callback) callback();
+  }
 }
 
+/**
+ * Devuelve la traducción de una clave (key)
+ */
 export function getPhrase(key) {
   if (!translations) {
     const locals = localStorage.getItem("translations");
@@ -31,6 +55,7 @@ export function getPhrase(key) {
 
   let phrase = key;
   const keys = translations?.data?.words;
+
   if (keys && Array.isArray(keys)) {
     const translation = keys.find((item) => item.key === key);
     if (translation && translation.translate) {
@@ -41,30 +66,21 @@ export function getPhrase(key) {
   return phrase;
 }
 
+/**
+ * Verifica si el idioma es uno permitido
+ */
 function isAllowedLanguage(language) {
   const allowedLanguages = [ES, EN, PT, DE];
   return allowedLanguages.includes(language);
 }
 
+/**
+ * Detecta el idioma del jugador (por URL o navegador)
+ */
 export function getLanguageConfig() {
   let languageConfig;
 
-  // Obtener desde la URL el idioma
-  console.log(window.location.href);
-
-  /* 
-      depende como lo manejemos: 
-      1) puede venir como www.dominio.com/es
-      2) puede venir como www.dominio.com?lang=es
-
-      En el primer caso se obtiene con: window.location.pathname
-      En el segundo caso se obtiene leyendo el query param lang 
-      
-      vamos a implementar una logica que cubra ambos casos
-    */
-
-  const path =
-    window.location.pathname !== "/" ? window.location.pathname : null;
+  const path = window.location.pathname !== "/" ? window.location.pathname : null;
   const params = new URL(window.location.href).searchParams;
   const queryLang = params.get("lang");
 

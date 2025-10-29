@@ -5,105 +5,151 @@ export default class Registro extends Phaser.Scene {
     super("Registro");
   }
 
+  preload() {
+    this.load.image("iconAnon", "assets/image/icons/persona.png");
+    this.load.image("iconGitHub", "assets/image/icons/github.png");
+    this.load.image("iconGoogle", "assets/image/icons/google.png");
+  }
+
   create() {
-    // 🔥 Obtener el plugin de Firebase
+    const mode = import.meta.env.VITE_MODE;
+    console.log(`🚀 Iniciando en modo: ${mode.toUpperCase()}`);
+
+    if (mode === "arcade") {
+      this.scene.start("MainMenu");
+      return;
+    }
+
     this.firebase = this.plugins.get("FirebasePlugin");
+    this.cameras.main.setBackgroundColor("#0d1117");
 
-    // Fondo simple con color
-    this.cameras.main.setBackgroundColor("#8c00ffff");
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
 
-    // Título
-    this.add.text(450, 100, "Registro", {
-      fontFamily: "Times New Roman",
-      fontSize: 55,
-      color: "#ffffff",
-      stroke: "#000000",
-      strokeThickness: 6,
+    // 🔳 Panel con sombra simulada
+    this.add.rectangle(cx + 5, cy + 5, 420, 460, 0x000000, 0.25);
+    const panel = this.add.rectangle(cx, cy, 420, 460, 0xffffff);
+    panel.setStrokeStyle(2, 0x30363d);
+
+    // 🧾 Título
+    this.add.text(cx, cy - 160, "Iniciar sesión", {
+      fontFamily: "Arial",
+      fontSize: 38,
+      color: "#000",
+      fontStyle: "bold",
     }).setOrigin(0.5);
 
-    // Subtítulo
-    this.add.text(450, 190, "Elegí cómo querés ingresar", {
-      fontFamily: "Times New Roman",
-      fontSize: 25,
-      color: "#eaf3ff",
+    // 🔑 Campos simulados
+    this.add.rectangle(cx, cy - 80, 300, 40, 0xf6f8fa).setStrokeStyle(1, 0xd0d7de);
+    this.add.text(cx - 120, cy - 90, "📧 Email", { fontFamily: "Arial", fontSize: 16, color: "#555" });
+
+    this.add.rectangle(cx, cy - 20, 300, 40, 0xf6f8fa).setStrokeStyle(1, 0xd0d7de);
+    this.add.text(cx - 140, cy - 30, "🔒 Contraseña", { fontFamily: "Arial", fontSize: 16, color: "#555" });
+
+    // ❤️ Botón principal
+    const boton = this.add.rectangle(cx, cy + 40, 200, 45, 0xdb0000)
+      .setInteractive({ useHandCursor: true });
+    this.add.text(cx, cy + 40, "Iniciar sesión", {
+      fontFamily: "Arial",
+      fontSize: 20,
+      color: "#ffffff",
     }).setOrigin(0.5);
 
-    // 🧡 Email y contraseña
-    this.add.text(450, 250, "Ingresar con Email y contraseña", {
-      fontFamily: "Times New Roman",
-      fontSize: 24,
-      color: "#ffff00",
-    })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => {
-        const email = prompt("📧 Email:");
-        const password = prompt("🔑 Contraseña:");
-        this.firebase
-          .signInWithEmail(email, password)
-          .then(() => this.scene.start("Game"))
-          .catch(() => {
-            const crearUsuario = window.confirm(
-              "Email no encontrado.\n¿Querés crear un usuario nuevo?"
-            );
-            if (crearUsuario) {
-              this.firebase
-                .createUserWithEmail(email, password)
-                .then(() => this.scene.start("MainMenu"))
-                .catch((err) => console.log("Error al crear usuario:", err));
-            }
-          });
-      });
+    // 🟣 Mensaje dinámico
+    const message = this.add.text(cx, cy + 90, "", {
+      fontFamily: "Arial",
+      fontSize: 16,
+      color: "#ff0000",
+    }).setOrigin(0.5);
 
-    // 🩵 Anónimo
-    this.add.text(450, 320, "Ingresar como Invitado", {
-      fontFamily: "Times New Roman",
-      fontSize: 24,
-      color: "#ffffff",
-    })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => {
-        this.firebase
-          .signInAnonymously()
-          .then(() => this.scene.start("MainMenu"))
-          .catch((err) => console.log("Error anónimo:", err));
-      });
+    // 🔐 LOGIN con email
+    boton.on("pointerdown", async () => {
+      const email = prompt("📧 Email:");
+      const password = prompt("🔑 Contraseña:");
+      if (!email || !password) return;
 
-    // 🔵 Google
-    this.add.text(450, 400, "Ingresar con Google", {
-      fontFamily: "Times New Roman",
-      fontSize: 24,
-      color: "#00ffcc",
-    })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => {
-        this.firebase
-          .signInWithGoogle()
-          .then(() => this.scene.start("MainMenu"))
-          .catch((err) => console.log("Error con Google:", err));
-      });
+      this.firebase
+        .signInWithEmail(email, password)
+        .then(() => {
+          message.setColor("#00b400").setText("✅ Sesión iniciada correctamente");
+          setTimeout(() => this.scene.start("MainMenu"), 800);
+        })
+        .catch((err) => {
+          console.log("⚠️ Error Firebase:", err.code);
 
-    // ⚫ GitHub
-    this.add.text(450, 480, "Ingresar con GitHub", {
-      fontFamily: "Times New Roman",
-      color: "#dddddd",
-    })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => {
-        this.firebase
-          .signInWithGithub()
-          .then(() => this.scene.start("MainMenu"))
-          .catch((err) => console.log("Error con GitHub:", err));
-      });
+          const crearUsuario = window.confirm(
+            "📭 Email no encontrado.\n¿Desea crear un usuario nuevo?"
+          );
+          if (crearUsuario) {
+            this.firebase
+              .createUserWithEmail(email, password)
+              .then(() => {
+                message.setColor("#00b400").setText("✅ Usuario creado correctamente");
+                setTimeout(() => this.scene.start("MainMenu"), 800);
+              })
+              .catch((createUserError) => {
+                console.log("🚨 Error al crear usuario:", createUserError);
+                message.setColor("#ff0000").setText("⚠️ No se pudo crear la cuenta");
+              });
+          } else {
+            message.setColor("#999").setText("✉️ Creación cancelada");
+          }
+        });
+    });
 
-    // 🩶 Firma Red Studio
-    this.add.text(450, 560, "© Red Studio 2025", {
-      fontFamily: "Times New Roman",
+    // 🔹 Separador
+    this.add.text(cx, cy + 100, "o continuar con", {
+      fontFamily: "Arial",
       fontSize: 18,
-      color: "#ffffff",
+      color: "#000000ff",
+    }).setOrigin(0.5);
+
+    // 🧿 Íconos (GitHub - Invitado - Google)
+    const spacing = 100;
+    const yIcons = cy + 180;
+    const github = this.add.image(cx - spacing, yIcons, "iconGitHub").setDisplaySize(48, 48).setInteractive({ useHandCursor: true });
+    const anon = this.add.image(cx, yIcons, "iconAnon").setDisplaySize(52, 52).setInteractive({ useHandCursor: true });
+    const google = this.add.image(cx + spacing, yIcons, "iconGoogle").setDisplaySize(46, 46).setInteractive({ useHandCursor: true });
+
+    // ✨ Efecto hover
+    [github, anon, google].forEach(icon => {
+      icon.on("pointerover", () => this.tweens.add({ targets: icon, scale: 1.15, duration: 150 }));
+      icon.on("pointerout", () => this.tweens.add({ targets: icon, scale: 1, duration: 150 }));
+    });
+
+    // 🔗 Métodos alternativos
+    github.on("pointerdown", async () => {
+      try {
+        await this.firebase.signInWithGithub();
+        this.scene.start("MainMenu");
+      } catch {
+        message.setText("⚠️ Error con GitHub");
+      }
+    });
+
+    anon.on("pointerdown", async () => {
+      try {
+        await this.firebase.signInAnonymously();
+        this.scene.start("MainMenu");
+      } catch {
+        message.setText("⚠️ Error al ingresar como invitado");
+      }
+    });
+
+    google.on("pointerdown", async () => {
+      try {
+        await this.firebase.signInWithGoogle();
+        this.scene.start("MainMenu");
+      } catch {
+        message.setText("⚠️ Error con Google");
+      }
+    });
+
+    // 🩶 Firma
+    this.add.text(cx, this.scale.height - 80, "© Red Studio 2025", {
+      fontFamily: "Arial",
+      fontSize: 20,
+      color: "#ff0000ff",
     }).setOrigin(0.5);
   }
 }
