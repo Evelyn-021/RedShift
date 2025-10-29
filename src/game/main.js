@@ -6,7 +6,6 @@ import Game from "./scenes/Game";
 import GameOver from "./scenes/GameOver";
 import FirebasePlugin from "../plugins/FireBasePlugin.js";
 
-
 const config = {
   type: Phaser.AUTO,
   width: 1024,
@@ -19,6 +18,10 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
 
+  
+  dom: {
+    createContainer: true, // 🔥 Permite usar this.add.dom() (inputs HTML en Phaser)
+  },
 
   plugins: {
     global: [
